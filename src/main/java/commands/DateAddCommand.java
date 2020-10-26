@@ -33,6 +33,7 @@ public class DateAddCommand implements Command
 
             FileWriter file = new FileWriter("DatesAndNames.json");
             file.write(jObj.toJSONString());
+            file.close();
             final MessageChannel channel = event.getMessage().getChannel().block();
             channel.createMessage("Complete!").block();
         }
