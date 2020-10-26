@@ -29,7 +29,7 @@ public class DateAddCommand implements Command
         {
             JSONObject jObj = (JSONObject) readingRainbow.parse(new FileReader(("DatesAndNames.json")));
 
-            jObj.put("date", "message");
+            jObj.put(arguments[0], arguments[1]);
 
             FileWriter file = new FileWriter("DatesAndNames.json");
             file.write(jObj.toJSONString());
