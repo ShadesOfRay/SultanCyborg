@@ -27,7 +27,8 @@ public class DateAddCommand implements Command
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            final MessageChannel channel = event.getMessage().getChannel().block();
+            channel.createMessage("WRONG! " + e.toString()).block();
         }
 
     }
