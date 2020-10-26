@@ -7,6 +7,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 
 public class BotTest {
     public static void main(String[] args){
+        //this is all shamelessly stolen from the site
         final String token = args[0];
         final DiscordClient client = DiscordClient.create(token);
         final GatewayDiscordClient gateway = client.login().block();
