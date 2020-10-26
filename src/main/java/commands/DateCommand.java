@@ -8,9 +8,8 @@ public class DateCommand implements Command{
 
     public String invoker()
     {
-        return "date " + nameOfImportance;
+        return "!date " + nameOfImportance;
     }
-
     @Override
     public String info() {
         return null;
@@ -20,7 +19,6 @@ public class DateCommand implements Command{
     public int[] argumentsNeeded() {
         return new int[0];
     }
-
     public void action(MessageCreateEvent event, String[] arguments)
     {
         final MessageChannel channel = event.getMessage().getChannel().block();
