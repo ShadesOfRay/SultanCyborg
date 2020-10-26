@@ -11,21 +11,20 @@ import java.util.ArrayList;
 public class SultanCyborgMain {
     public static final ArrayList<Command> commands= new ArrayList<>();
     public static void main(String[] args){
-        //make a storage for all the commands
+        //Add all the commands
         commands.add(new PingCommand());
-        //make a storage for all the listeners...?
 
-        final GatewayDiscordClient client = DiscordClientBuilder.create(args[0]).build()
-                .login()
-                .block();
-        client.onDisconnect().block();
+        //Create the client
+        final GatewayDiscordClient client = DiscordClientBuilder.create(args[0]).build().login().block();
 
+
+        //The message listener, which filters out messages from bots and then sends them to the parser
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
                 .subscribe(event -> {
                     MessageParser.parseMessage(event);
         });
 
-
+        client.onDisconnect().block();
     }
 }

@@ -20,7 +20,12 @@ public class PingCommand implements Command{
 
     public void action(MessageCreateEvent event, String[] arguments) {
         final MessageChannel channel = event.getMessage().getChannel().block();
-        channel.createMessage("Pong!").block();
+        if (arguments != null) {
+            channel.createMessage("Pong!\n" + arguments.toString()).block();
+        }
+        else {
+            channel.createMessage("Pong!\n").block();
+        }
     }
 
     public void log(MessageCreateEvent event){
