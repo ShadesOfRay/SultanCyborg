@@ -12,7 +12,7 @@ public class SultanCyborgMain {
     public static final ArrayList<Command> commands= new ArrayList<>();
     public static void main(String[] args){
         //make a storage for all the commands
-        commands.add(PingCommand.class);
+        commands.add(new PingCommand());
         //make a storage for all the listeners...?
 
         final GatewayDiscordClient client = DiscordClientBuilder.create(args[0]).build()
@@ -21,6 +21,7 @@ public class SultanCyborgMain {
         client.onDisconnect().block();
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
                 .subscribe(event -> {
                     MessageParser.parseMessage(event);
         });

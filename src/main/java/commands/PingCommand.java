@@ -8,7 +8,17 @@ public class PingCommand implements Command{
         return "ping";
     }
 
-    public void action(MessageCreateEvent event) {
+    @Override
+    public String info() {
+        return "Just says pong back";
+    }
+
+    @Override
+    public int[] argumentsNeeded() {
+        return new int[]{0};
+    }
+
+    public void action(MessageCreateEvent event, String[] arguments) {
         final MessageChannel channel = event.getMessage().getChannel().block();
         channel.createMessage("Pong!").block();
     }
