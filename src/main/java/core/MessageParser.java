@@ -26,6 +26,7 @@ public class MessageParser {
             }
         }
         //checks each command to see if the command matches
+        //TODO make it check the arguments amount as well
         for(Command cmd : SultanCyborgMain.commands){
             if (no_prefix.equalsIgnoreCase(cmd.invoker())){
                 cmd.action(event, arguments);
