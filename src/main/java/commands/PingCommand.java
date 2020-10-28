@@ -10,7 +10,7 @@ public class PingCommand implements Command{
 
     @Override
     public String info() {
-        return "Just says pong back";
+        return "Just says pong back, also used for testing";
     }
 
     @Override

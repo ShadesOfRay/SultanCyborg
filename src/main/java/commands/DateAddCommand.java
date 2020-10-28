@@ -19,7 +19,7 @@ public class DateAddCommand implements Command
 
     @Override
     public int[] argumentsNeeded() {
-        return new int[0];
+        return new int[] {2};
     }
 
     public void action(MessageCreateEvent event, String[] arguments)

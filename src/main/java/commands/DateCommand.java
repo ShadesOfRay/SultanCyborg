@@ -20,7 +20,7 @@ public class DateCommand implements Command{
 
     @Override
     public int[] argumentsNeeded() {
-        return new int[0];
+        return new int[] {1};
     }
     public void action(MessageCreateEvent event, String[] arguments)
     {
