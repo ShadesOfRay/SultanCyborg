@@ -19,7 +19,9 @@ public interface Command {
 
     /**
      * The amount of arguments that a command wants in order to run correctly, the array should have all the valid
-     * amounts of arguments that the command wants, a -1 means any amount of arguments.
+     * amounts of arguments that the command wants,
+     *
+     * a -1
      *
      * @return the amount of arguments that a command requires
      */

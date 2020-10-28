@@ -42,7 +42,7 @@ public class MessageParser {
             for(Command cmd : SultanCyborgMain.commands){
                 if (no_prefix.equalsIgnoreCase(cmd.invoker())){
                     for (int args : cmd.argumentsNeeded()){
-                        if ((arguments == null && args == 0) || (arguments != null && args == arguments.length)){
+                        if ((args == -1) || (arguments == null && args == 0) || (arguments != null && args == arguments.length)){
                             cmd.action(event, arguments);
                             cmd.log(event);
                             return 1;
