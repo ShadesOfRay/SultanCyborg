@@ -41,12 +41,20 @@ public class MessageParser {
             //TODO make it check the arguments amount as well
             for(Command cmd : SultanCyborgMain.commands){
                 if (no_prefix.equalsIgnoreCase(cmd.invoker())){
-                    for (int args : cmd.argumentsNeeded()){
-                        if ((args == -1) || (arguments == null && args == 0) || (arguments != null && args == arguments.length)){
-                            cmd.action(event, arguments);
-                            cmd.log(event);
-                            return 1;
+                    if (cmd.argumentsNeeded() == null) {
+                        for (int args : cmd.argumentsNeeded()) {
+                            if (args == arguments.length) {
+                                cmd.action(event, arguments);
+                                cmd.log(event);
+                                return 1;
+                            }
                         }
+
+                    }
+                    else {
+                        cmd.action(event, arguments);
+                        cmd.log(event);
+                        return 1;
                     }
                     final MessageChannel channel = event.getMessage().getChannel().block();
                     channel.createMessage("Wrong amount of arguments").block();
