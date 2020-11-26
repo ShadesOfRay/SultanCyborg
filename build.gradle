@@ -7,6 +7,7 @@ group 'org.sultans'
 version '1.0-SNAPSHOT'
 apply plugin: "application"
 apply plugin: "java"
+mainClassName = 'org.sultans.sultancyborg.core.SultanCyborgMain'
 
 repositories {
     mavenCentral()

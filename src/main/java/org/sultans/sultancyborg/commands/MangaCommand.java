@@ -143,7 +143,51 @@ public class MangaCommand implements Command{
     }
 
     private void updateManga(){
+        try {
+            JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+            mainData.forEach((key, value) -> {
+                //get the new chapter json, check the size differences
+                try {
+                    JSONObject oldChapterData = (JSONObject) parser.parse(new FileReader(key + ".json"));
+                    Request request = new Request.Builder()
+                            .url(cdnURL + "manga/" + key + "/chapters")
+                            .build();
+                    Response response = client.newCall(request).execute();
+                    JSONObject newChapterData = (JSONObject) parser.parse(response.body().charStream());
 
+                    long responseCode = (long) newChapterData.get("code");
+                    if (responseCode == 200){
+                        JSONObject newChapterObject= (JSONObject) newChapterData.get("data");
+                        JSONArray newChapterArray = (JSONArray) newChapterObject.get("chapters");
+                        JSONArray oldChapterArray = (JSONArray) oldChapterData.get("chapters");
+                        //If the new chapter json is larger, then there are new chapters
+                        //make a embedded message for the new chapter
+                        if(oldChapterArray.size()  < newChapterArray.size()){
+                            //TODO
+                        }
+                        //If the new chapter json is smaller, then there was a deleted chapter
+                        //silently replace the chapter file with the new one
+                        else if(oldChapterArray.size() > newChapterArray.size()){
+                            //TODO
+                        }
+                        //Chapter arrays are the same size
+                        else {
+                            //TODO
+                        }
+                    }
+                    else {
+                        channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterData.get("status"))).block();
+                    }
+
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void listManga(){
