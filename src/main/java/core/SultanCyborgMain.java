@@ -2,6 +2,7 @@ package core;
 
 import commands.Command;
 import commands.DateAddCommand;
+import commands.MangaCommand;
 import commands.PingCommand;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
@@ -15,6 +16,7 @@ public class SultanCyborgMain {
         //Add all the commands
         commands.add(new PingCommand());
         commands.add(new DateAddCommand());
+        commands.add(new MangaCommand());
         //Create the client
         final GatewayDiscordClient client = DiscordClientBuilder.create(args[0]).build().login().block();
 

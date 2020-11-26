@@ -27,11 +27,11 @@ public class DateAddCommand implements Command
         JSONParser readingRainbow = new JSONParser();
         try
         {
-            JSONObject jObj = (JSONObject) readingRainbow.parse(new FileReader(("DatesAndNames.json")));
+            JSONObject jObj = (JSONObject) readingRainbow.parse(new FileReader("data/DatesAndNames.json"));
 
             jObj.put(arguments[0], arguments[1]);
 
-            FileWriter file = new FileWriter("DatesAndNames.json");
+            FileWriter file = new FileWriter("data/DatesAndNames.json");
             file.write(jObj.toJSONString());
             file.close();
             final MessageChannel channel = event.getMessage().getChannel().block();

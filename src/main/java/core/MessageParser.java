@@ -41,7 +41,7 @@ public class MessageParser {
             //TODO make it check the arguments amount as well
             for(Command cmd : SultanCyborgMain.commands){
                 if (no_prefix.equalsIgnoreCase(cmd.invoker())){
-                    if (cmd.argumentsNeeded() == null) {
+                    if (cmd.argumentsNeeded() != null) {
                         for (int args : cmd.argumentsNeeded()) {
                             if (args == arguments.length) {
                                 cmd.action(event, arguments);
