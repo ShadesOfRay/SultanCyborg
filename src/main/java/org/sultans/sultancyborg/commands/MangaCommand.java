@@ -9,16 +9,16 @@ import okhttp3.Response;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.*;
 
 public class MangaCommand implements Command{
-
-    private String cdnURL = "https://mangadex.org/api/v2/";
-    private String baseURL = "https://mangadex.org/";
+    private final String baseURL = "https://mangadex.org/";
+    private final String cdnURL = "https://mangadex.org/api/v2/";
     private OkHttpClient client;
     private MessageChannel channel;
-    JSONParser parser;
+    private JSONParser parser;
 
     @Override
     public String invoker() {
@@ -45,7 +45,12 @@ public class MangaCommand implements Command{
 
             switch (arguments[0].toLowerCase()) {
                 case "add":
-                    addManga(arguments[1]);
+                    if (arguments.length == 2) {
+                        addManga(arguments[1]);
+                    }
+                    else {
+                        channel.createMessage("Invalid amount of arguments").block();
+                    }
                     break;
                 case "update":
                     updateManga();
@@ -54,7 +59,13 @@ public class MangaCommand implements Command{
                     listManga();
                     break;
                 case "remove":
-                    removeManga();
+                    if (arguments.length == 2) {
+                        removeManga(arguments[1]);
+                    }
+                    else {
+                        channel.createMessage("Invalid amount of arguments").block();
+                    }
+
                 default:
                     printHelp();
             }
@@ -154,7 +165,22 @@ public class MangaCommand implements Command{
         }
     }
 
-    private void removeManga(){
+    private void removeManga(String id){
+        try {
+            JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+            if (mainData.containsKey(id)){
+                mainData.remove(id);
+                FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
+                databaseWriter.write(mainData.toJSONString());
+                databaseWriter.close();
+                channel.createMessage("Removed").block();
+            }
+            else {
+                channel.createMessage("That manga is not in the database").block();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
