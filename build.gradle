@@ -1,9 +1,12 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group 'org.sultans'
 version '1.0-SNAPSHOT'
+apply plugin: "application"
+apply plugin: "java"
 
 repositories {
     mavenCentral()
@@ -16,4 +19,8 @@ dependencies {
     implementation 'com.cedarsoftware:json-io:4.10.1'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+}
+
+task (runMain, dependsOn: 'classes', type: JavaExec){
+    main = 'org.sultans.sultancyborg.core.SultanCyborgMain'
 }

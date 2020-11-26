@@ -121,11 +121,13 @@ public class MangaCommand implements Command{
                             chapterDataWriter.close();
                             channel.createMessage(String.format("Successfully added \"%s\" to the database", data.get("title"))).block();
 
-                        } else {
-                            channel.createMessage("Unexpected response code: " + responseCode).block();
                         }
-                    } else {
-                        channel.createMessage("Unexpected response code: " + responseCode).block();
+                        else {
+                            channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) temp.get("status"))).block();
+                        }
+                    }
+                    else {
+                        channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) temp.get("status"))).block();
                     }
                 }
                 else {
