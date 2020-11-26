@@ -1,8 +1,7 @@
-package commands;
+package org.sultans.sultancyborg.commands;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.rest.util.Color;
 
 public class PingCommand implements Command{
     public String invoker() {

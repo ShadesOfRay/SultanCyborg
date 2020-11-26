@@ -1,4 +1,4 @@
-package commands;
+package org.sultans.sultancyborg.commands;
 import java.io.FileReader;
 import java.util.ArrayList;
 import discord4j.core.event.domain.message.MessageCreateEvent;

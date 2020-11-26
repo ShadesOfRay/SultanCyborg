@@ -1,4 +1,4 @@
-package commands;
+package org.sultans.sultancyborg.commands;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.MessageChannel;

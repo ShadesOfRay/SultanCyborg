@@ -1,13 +1,9 @@
-package core;
+package org.sultans.sultancyborg.core;
 
-import commands.Command;
+import org.sultans.sultancyborg.commands.Command;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.MessageChannel;
-import utils.STATIC;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.sultans.sultancyborg.utils.STATIC;
 
 public class MessageParser {
 
@@ -43,7 +39,7 @@ public class MessageParser {
                 if (no_prefix.equalsIgnoreCase(cmd.invoker())){
                     if (cmd.argumentsNeeded() != null) {
                         for (int args : cmd.argumentsNeeded()) {
-                            if (args == arguments.length) {
+                            if ((args == 0 && arguments == null) ||args == arguments.length) {
                                 cmd.action(event, arguments);
                                 cmd.log(event);
                                 return 1;

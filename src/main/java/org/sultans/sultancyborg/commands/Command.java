@@ -1,4 +1,4 @@
-package commands;
+package org.sultans.sultancyborg.commands;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.util.annotation.Nullable;
 
@@ -13,7 +13,7 @@ public interface Command {
     /**
      * The String that has all the info about the command, including what it does and what kind of inputs it wants.
      *
-     * @return the info about the commands
+     * @return the info about the org.sultans.SultanCyborg.commands
      */
     String info();
 
