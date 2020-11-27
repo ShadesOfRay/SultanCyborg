@@ -143,6 +143,7 @@ public class MangaCommand implements Command{
     }
 
     private void updateManga(){
+        //TODO make it update the main page too maybe
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
             mainData.forEach((key, value) -> {
@@ -177,7 +178,6 @@ public class MangaCommand implements Command{
                                 JSONObject oldArrayChapter = (JSONObject)oldChapterArray.get(oldPointer);
                                 JSONObject newArrayChapter = (JSONObject)newChapterArray.get(newPointer);
                                 if (!oldArrayChapter.equals(newArrayChapter)){
-                                    //TODO write a message for the new chapter
                                     long groupID = (long) ((JSONArray)newArrayChapter.get("groups")).get(0);
                                     channel.createEmbed(spec ->
                                         spec.setColor(Color.RED)
@@ -195,23 +195,23 @@ public class MangaCommand implements Command{
                                     oldPointer++;
                                 }
                             }
-                            //TODO replace the chapter file
+                            FileWriter chapterDataWriter = new FileWriter("data/chapters/" + key + ".json");
+                            chapterDataWriter.write(newChapterData.toJSONString());
+                            chapterDataWriter.close();
 
                         }
                         //If the new chapter json is smaller, then there was a deleted chapter
                         //silently replace the chapter file with the new one
                         else if(oldChapterArray.size() > newChapterArray.size()){
-                            //TODO
+                            FileWriter chapterDataWriter = new FileWriter("data/chapters/" + key + ".json");
+                            chapterDataWriter.write(newChapterData.toJSONString());
+                            chapterDataWriter.close();
                         }
-                        //Chapter arrays are the same size
-                        else {
-                            //TODO
-                        }
+                        //Chapter arrays are the same size, do nothing
                     }
                     else {
                         channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterObject.get("status"))).block();
                     }
-
                 }
                 catch (Exception e) {
                     e.printStackTrace();
