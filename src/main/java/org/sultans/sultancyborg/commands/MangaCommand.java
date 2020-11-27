@@ -10,6 +10,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.sultans.sultancyborg.utils.STATIC;
 
 import java.io.*;
 
@@ -146,7 +147,7 @@ public class MangaCommand implements Command{
         //TODO make it update the main page too maybe
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
-            channel.typeUntil(channel.createMessage("Finished updating"));
+            channel.typeUntil(channel.createMessage("Finished updating")).subscribe();
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
                 try {
@@ -261,11 +262,17 @@ public class MangaCommand implements Command{
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     private void printHelp(){
-
+        channel.createEmbed(spec ->
+            spec.setColor(Color.BLACK)
+                .setTitle(STATIC.PREFIX + "manga <command> [args]")
+                .addField("help", "Prints this message", false)
+                .addField("add [MangaDex manga Link]", "Adds the given manga from MangaDex to the database", false)
+                .addField("remove [Manga ID]", "Removes the given manga from the database", false)
+                .addField("list", "Lists all the manga in the database", false)
+                .addField("update", "Updates all the manga in the database, and sends any new chapters", false)
+        ).block();
     }
-
 }
