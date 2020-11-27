@@ -33,8 +33,8 @@ public class SultanCyborgMain {
 
         client.getGuildById(Snowflake.of("445031610765672456"))
                 .flatMap(guild -> guild.getChannelById(Snowflake.of("445071996360065054")))
-                .cast(TextChannel.class)
-                .flatMap(textChannel -> textChannel.createMessage("Bot Online"))
+                .cast(MessageChannel.class)
+                .flatMap(messageChannel -> messageChannel.createMessage("Bot Online"))
                 .then();
         //The message listener, which filters out messages from bots and then sends them to the parser
         client.getEventDispatcher().on(MessageCreateEvent.class)
