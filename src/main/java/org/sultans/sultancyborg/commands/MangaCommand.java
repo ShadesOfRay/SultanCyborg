@@ -148,22 +148,55 @@ public class MangaCommand implements Command{
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
                 try {
-                    JSONObject oldChapterData = (JSONObject) parser.parse(new FileReader(key + ".json"));
+                    JSONObject oldChapterData = (JSONObject) parser.parse(new FileReader("data/chapters/"+ key + ".json"));
                     Request request = new Request.Builder()
                             .url(cdnURL + "manga/" + key + "/chapters")
                             .build();
                     Response response = client.newCall(request).execute();
-                    JSONObject newChapterData = (JSONObject) parser.parse(response.body().charStream());
-
-                    long responseCode = (long) newChapterData.get("code");
+                    JSONObject newChapterObject = (JSONObject) parser.parse(response.body().charStream());
+                    long responseCode = (long) newChapterObject.get("code");
                     if (responseCode == 200){
-                        JSONObject newChapterObject= (JSONObject) newChapterData.get("data");
-                        JSONArray newChapterArray = (JSONArray) newChapterObject.get("chapters");
+                        JSONObject manga = (JSONObject) value;
+                        JSONObject newChapterData = (JSONObject) newChapterObject.get("data");
+                        JSONArray groupArray = (JSONArray) newChapterData.get("groups");
+                        JSONObject actualGroups = new JSONObject();
+                        groupArray.forEach(group ->{
+                            JSONObject groupObj = (JSONObject) group;
+                            actualGroups.put(groupObj.get("id"), groupObj.get("name"));
+                        });
+
+                        JSONArray newChapterArray = (JSONArray) newChapterData.get("chapters");
                         JSONArray oldChapterArray = (JSONArray) oldChapterData.get("chapters");
                         //If the new chapter json is larger, then there are new chapters
                         //make a embedded message for the new chapter
-                        if(oldChapterArray.size()  < newChapterArray.size()){
-                            //TODO
+                        if(oldChapterArray.size() < newChapterArray.size()){
+                            int diff = newChapterArray.size() - oldChapterArray.size();
+                            int oldPointer = 0;
+                            for (int newPointer = 0; diff != 0; newPointer++){
+                                //checks if the chapters are equal
+                                JSONObject oldArrayChapter = (JSONObject)oldChapterArray.get(oldPointer);
+                                JSONObject newArrayChapter = (JSONObject)newChapterArray.get(newPointer);
+                                if (!oldArrayChapter.equals(newArrayChapter)){
+                                    //TODO write a message for the new chapter
+                                    long groupID = (long) newArrayChapter.get("groups");
+                                    channel.createEmbed(spec ->
+                                        spec.setColor(Color.RED)
+                                            .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
+                                            .setThumbnail((String) manga.get("mainCover"))
+                                            .setTitle((String) manga.get("title"))
+                                            .setUrl(baseURL + String.format("chapter/%d/", (long) newArrayChapter.get("id")))
+                                            .addField("Chapter", (String)newArrayChapter.get("chapter"), true)
+                                            .addField("Group", (String) actualGroups.get(groupID), true)
+                                            .addField("id", String.valueOf((long) manga.get("id")), true)
+                                    ).block();
+                                    diff--;
+                                }
+                                else {
+                                    oldPointer++;
+                                }
+                            }
+                            //TODO replace the chapter file
+
                         }
                         //If the new chapter json is smaller, then there was a deleted chapter
                         //silently replace the chapter file with the new one
@@ -176,7 +209,7 @@ public class MangaCommand implements Command{
                         }
                     }
                     else {
-                        channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterData.get("status"))).block();
+                        channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterObject.get("status"))).block();
                     }
 
                 }
