@@ -1,7 +1,9 @@
 package org.sultans.sultancyborg.core;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -29,13 +31,22 @@ public class SultanCyborgMain {
         commands.add(new DateAddCommand());
         commands.add(new MangaCommand());
         //Create the client
-        client = DiscordClientBuilder.create(args[0]).build().login().block();
+        client = DiscordClientBuilder.create(args[0])
+                .build()
+                .login()
+                .block();
 
-        client.getGuildById(Snowflake.of("445031610765672456"))
-                .flatMap(guild -> guild.getChannelById(Snowflake.of("445071996360065054")))
-                .cast(MessageChannel.class)
-                .flatMap(messageChannel -> messageChannel.createMessage("Bot Online"))
-                .then();
+        client.getEventDispatcher().on(ReadyEvent.class)
+                .subscribe(event -> {
+                    User self = event.getSelf();
+                    client.getChannelById(Snowflake.of("445071996360065054"))
+                            .cast(MessageChannel.class)
+                            .flatMap(messageChannel -> messageChannel.createMessage("Bot Online"))
+                            .then();
+                });
+
+
+
         //The message listener, which filters out messages from bots and then sends them to the parser
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
