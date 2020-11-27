@@ -28,8 +28,8 @@ public class MangaCommand implements Command{
 
     @Override
     public String info() {
-        //TODO
-        return null;
+        return "Interacts with the manga database\n" +
+                "Use sult!manga help for more info";
     }
 
     @Override
@@ -241,6 +241,7 @@ public class MangaCommand implements Command{
                         .addField("id", String.valueOf((long) manga.get("id")), true)
                 )).subscribe();
             });
+            channel.createMessage("Done listing").block();
         } catch (Exception e) {
             e.printStackTrace();
         }
