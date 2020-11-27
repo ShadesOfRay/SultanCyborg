@@ -58,7 +58,7 @@ public class MessageParser {
             }
 
             final MessageChannel channel = event.getMessage().getChannel().block();
-            channel.createMessage("Thanks crazy, cuz I didn't ask").block();
+            channel.createMessage("That's crazy, cuz I didn't ask").block();
             return 0;
         }
         return 0;
