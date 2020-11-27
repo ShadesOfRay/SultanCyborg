@@ -11,14 +11,16 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.ArrayList;
 
 public class SultanCyborgMain {
-    public static final ArrayList<Command> commands= new ArrayList<>();
+    public static final ArrayList<Command> commands = new ArrayList<>();
+    public static GatewayDiscordClient client;
+
     public static void main(String[] args){
         //Add all the org.sultans.SultanCyborg.commands
         commands.add(new PingCommand());
         commands.add(new DateAddCommand());
         commands.add(new MangaCommand());
         //Create the client
-        final GatewayDiscordClient client = DiscordClientBuilder.create(args[0]).build().login().block();
+        client = DiscordClientBuilder.create(args[0]).build().login().block();
 
 
         //The message listener, which filters out messages from bots and then sends them to the parser
@@ -30,4 +32,7 @@ public class SultanCyborgMain {
 
         client.onDisconnect().block();
     }
+
+
+
 }
