@@ -178,7 +178,7 @@ public class MangaCommand implements Command{
                                 JSONObject newArrayChapter = (JSONObject)newChapterArray.get(newPointer);
                                 if (!oldArrayChapter.equals(newArrayChapter)){
                                     //TODO write a message for the new chapter
-                                    long groupID = (long) newArrayChapter.get("groups");
+                                    long groupID = (long) ((JSONArray)newArrayChapter.get("groups")).get(0);
                                     channel.createEmbed(spec ->
                                         spec.setColor(Color.RED)
                                             .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
