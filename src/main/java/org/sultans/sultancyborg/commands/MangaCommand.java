@@ -166,7 +166,7 @@ public class MangaCommand implements Command{
                             JSONObject groupObj = (JSONObject) group;
                             actualGroups.put(groupObj.get("id"), groupObj.get("name"));
                         });
-
+                        //gets the chapter arrays for both the old and new ones
                         JSONArray newChapterArray = (JSONArray) newChapterData.get("chapters");
                         JSONArray oldChapterArray = (JSONArray) oldChapterData.get("chapters");
                         //If the new chapter json is larger, then there are new chapters
@@ -181,7 +181,7 @@ public class MangaCommand implements Command{
                                 if (!oldArrayChapter.equals(newArrayChapter)){
                                     long groupID = (long) ((JSONArray)newArrayChapter.get("groups")).get(0);
                                     channel.createEmbed(spec ->
-                                        spec.setColor(Color.RED)
+                                        spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
                                             .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
                                             .setThumbnail((String) manga.get("mainCover"))
                                             .setTitle((String) manga.get("title"))
@@ -199,7 +199,6 @@ public class MangaCommand implements Command{
                             FileWriter chapterDataWriter = new FileWriter("data/chapters/" + key + ".json");
                             chapterDataWriter.write(newChapterData.toJSONString());
                             chapterDataWriter.close();
-
                         }
                         //If the new chapter json is smaller, then there was a deleted chapter
                         //silently replace the chapter file with the new one
@@ -228,17 +227,19 @@ public class MangaCommand implements Command{
     private void listManga(){
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+            //create a message for each key in the database
             mainData.forEach((key, value)-> {
                 JSONObject manga = (JSONObject) value;
                 //JSONArray (JSONArray) manga.get("author");
+                channel.typeUntil(
                 channel.createEmbed(spec ->
-                    spec.setColor(Color.RED)
+                    spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
                         .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
                         .setThumbnail((String) manga.get("mainCover"))
                         .setTitle((String) manga.get("title"))
                         .setUrl(baseURL + String.format("manga/%d/", (long) manga.get("id")))
                         .addField("id", String.valueOf((long) manga.get("id")), true)
-                ).block();
+                )).subscribe();
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -248,6 +249,7 @@ public class MangaCommand implements Command{
     private void removeManga(String id){
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+            //check if the database has the key, then remove it if it does
             if (mainData.containsKey(id)){
                 mainData.remove(id);
                 FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
@@ -264,6 +266,7 @@ public class MangaCommand implements Command{
     }
 
     private void printHelp(){
+        //creates an embedded message for the help message
         channel.createEmbed(spec ->
             spec.setColor(Color.BLACK)
                 .setTitle(STATIC.PREFIX + "manga <command> [args]")
