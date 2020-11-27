@@ -25,7 +25,6 @@ public class PingCommand implements Command{
         }
         else {
             channel.createMessage("Pong!\nAlso your Id is: "+ event.getMember().get().getId().asString()).block();
-
         }
     }
 
