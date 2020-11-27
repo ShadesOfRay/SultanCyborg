@@ -21,10 +21,10 @@ public class PingCommand implements Command{
     public void action(MessageCreateEvent event, String[] arguments) {
         final MessageChannel channel = event.getMessage().getChannel().block();
         if (arguments != null) {
-            channel.createMessage("Pong!\n" + event.getMember().get().getId().asString()).block();
+            channel.createMessage("Pong!\n").block();
         }
         else {
-            channel.createMessage("Pong!\n").block();
+            channel.createMessage("Pong!\nAlso your Id is: "+ event.getMember().get().getId().asString()).block();
 
         }
     }
