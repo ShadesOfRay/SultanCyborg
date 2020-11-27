@@ -147,7 +147,7 @@ public class MangaCommand implements Command{
         //TODO make it update the main page too maybe
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
-            channel.typeUntil(channel.createMessage("Finished updating")).subscribe();
+            channel.typeUntil(channel.createMessage("Finished updating"));
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
                 try {
@@ -219,7 +219,7 @@ public class MangaCommand implements Command{
                     e.printStackTrace();
                 }
             });
-            channel.createMessage("Finished updating").block();
+            channel.createMessage("Finished updating").subscribe();
         }
         catch (Exception e){
             e.printStackTrace();
