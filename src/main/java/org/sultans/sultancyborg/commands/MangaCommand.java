@@ -9,10 +9,10 @@ import okhttp3.Response;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.sultans.sultancyborg.utils.STATIC;
 
 import java.io.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MangaCommand implements Command{
     private final String baseURL = "https://mangadex.org/";
@@ -147,6 +147,7 @@ public class MangaCommand implements Command{
         //TODO make it update the main page too maybe
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+            AtomicInteger size = new AtomicInteger(mainData.size());
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
                 try {
@@ -212,12 +213,16 @@ public class MangaCommand implements Command{
                     else {
                         channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterObject.get("status"))).block();
                     }
+                    size.getAndDecrement();
+                    if (size.equals(new AtomicInteger(0))){
+                        channel.createMessage("Finished updating").subscribe();
+                    }
                 }
                 catch (Exception e) {
                     e.printStackTrace();
                 }
             });
-            channel.createMessage("Finished updating").subscribe();
+
         }
         catch (Exception e){
             e.printStackTrace();
