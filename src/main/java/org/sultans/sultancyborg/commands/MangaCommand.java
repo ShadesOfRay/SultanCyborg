@@ -254,12 +254,12 @@ public class MangaCommand implements Command{
     private void listManga(){
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
-
             //create a message for each key in the database
             mainData.forEach((key, value)-> {
                 JSONObject manga = (JSONObject) value;
                 try {
-                    JSONArray chapterList = (JSONArray) parser.parse(new FileReader("data/chapters/" + key + ".json"));
+                    JSONObject chapterData = (JSONObject) parser.parse(new FileReader("data/chapters/" + key + ".json"));
+                    JSONArray chapterList = (JSONArray) chapterData.get("chapters");
                     //JSONArray (JSONArray) manga.get("author");
                     JSONObject latestChapter = (JSONObject) chapterList.get(0);
                     Calendar dateUpdated = Calendar.getInstance();
