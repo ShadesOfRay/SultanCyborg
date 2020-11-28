@@ -7,10 +7,7 @@ import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
-import org.sultans.sultancyborg.commands.Command;
-import org.sultans.sultancyborg.commands.DateAddCommand;
-import org.sultans.sultancyborg.commands.MangaCommand;
-import org.sultans.sultancyborg.commands.PingCommand;
+import org.sultans.sultancyborg.commands.*;
 
 import java.util.ArrayList;
 
@@ -23,6 +20,7 @@ public class SultanCyborgMain {
         commands.add(new PingCommand());
         commands.add(new DateAddCommand());
         commands.add(new MangaCommand());
+        commands.add(new HelpCommand());
         //Create the client
         client = DiscordClientBuilder.create(args[0])
                 .build()

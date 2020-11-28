@@ -29,7 +29,7 @@ public class MangaCommand implements Command{
     @Override
     public String info() {
         return "Interacts with the manga database\n" +
-                "Use sult!manga help for more info";
+                "Use \"sult!manga help\" for more info";
     }
 
     @Override
@@ -144,10 +144,8 @@ public class MangaCommand implements Command{
     }
 
     private void updateManga(){
-        //TODO make it update the main page too maybe
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
-            AtomicInteger size = new AtomicInteger(mainData.size());
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
                 try {
@@ -159,6 +157,26 @@ public class MangaCommand implements Command{
                     JSONObject newChapterObject = (JSONObject) parser.parse(response.body().charStream());
                     long responseCode = (long) newChapterObject.get("code");
                     if (responseCode == 200){
+                        //TODO make it update the main page too maybe
+                        request = new Request.Builder()
+                                .url(cdnURL + "manga/" + key)
+                                .build();
+                        response = client.newCall(request).execute();
+                        JSONObject temp = (JSONObject) parser.parse(response.body().charStream());
+                        JSONObject data = (JSONObject) temp.get("data");
+                        responseCode = (long) temp.get("code");
+                        //checks the response that mangadex gave
+                        if (responseCode == 200) {
+                            //if successful, get the data from mangadex
+                            mainData.put(data.get("id"), data);
+                            FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
+                            databaseWriter.write(mainData.toJSONString());
+                            databaseWriter.close();
+                        }
+                        else {
+                            channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterObject.get("status"))).block();
+                        }
+
                         JSONObject manga = (JSONObject) value;
                         JSONObject newChapterData = (JSONObject) newChapterObject.get("data");
                         JSONArray groupArray = (JSONArray) newChapterData.get("groups");
@@ -212,10 +230,6 @@ public class MangaCommand implements Command{
                     }
                     else {
                         channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterObject.get("status"))).block();
-                    }
-                    size.getAndDecrement();
-                    if (size.equals(new AtomicInteger(0))){
-                        channel.createMessage("Finished updating").subscribe();
                     }
                 }
                 catch (Exception e) {
