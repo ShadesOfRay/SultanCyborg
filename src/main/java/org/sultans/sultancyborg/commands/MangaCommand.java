@@ -14,6 +14,8 @@ import org.sultans.sultancyborg.utils.STATIC;
 
 import java.io.*;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -254,6 +256,7 @@ public class MangaCommand implements Command{
     private void listManga(){
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
             //create a message for each key in the database
             mainData.forEach((key, value)-> {
                 JSONObject manga = (JSONObject) value;
@@ -262,8 +265,7 @@ public class MangaCommand implements Command{
                     JSONArray chapterList = (JSONArray) chapterData.get("chapters");
                     //JSONArray (JSONArray) manga.get("author");
                     JSONObject latestChapter = (JSONObject) chapterList.get(0);
-                    Calendar dateUpdated = Calendar.getInstance();
-                    dateUpdated.setTime(new Date((long)latestChapter.get("timestamp")));
+                    Date uploadDate = new Date((long)latestChapter.get("timestamp"));
                     channel.typeUntil(
                     channel.createEmbed(spec ->
                         spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
@@ -271,8 +273,8 @@ public class MangaCommand implements Command{
                             .setThumbnail((String) manga.get("mainCover"))
                             .setTitle((String) manga.get("title"))
                             .setUrl(baseURL + String.format("manga/%d/", (long) manga.get("id")))
-                            .addField("Latest Chapter", (String) latestChapter.get("chapter"), true)
-                            .addField("Last Updated", String.format("%d/%d/%d", dateUpdated.get(Calendar.MONTH), dateUpdated.get(Calendar.DAY_OF_MONTH), dateUpdated.get(Calendar.YEAR)), true )
+                            .addField("Latest Chapter", (String)latestChapter.get("chapter") , true)
+                            .addField("Last Updated", dateFormat.format(uploadDate), true )
                             .addField("id", String.valueOf((long) manga.get("id")), true)
                     )).subscribe();
                 } catch (Exception e) {
