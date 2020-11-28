@@ -240,6 +240,7 @@ public class MangaCommand implements Command{
                 databaseWriter.write(newMainData.toJSONString());
                 databaseWriter.close();
             }
+            channel.createMessage("Finished updating").subscribe();
         }
         catch (Exception e){
             e.printStackTrace();
