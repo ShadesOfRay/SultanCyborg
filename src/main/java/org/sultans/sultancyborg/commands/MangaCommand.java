@@ -1,6 +1,8 @@
 package org.sultans.sultancyborg.commands;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.rest.util.Color;
 import okhttp3.OkHttpClient;
@@ -153,6 +155,8 @@ public class MangaCommand implements Command{
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
             JSONObject newMainData = new JSONObject();
+            channel.createMessage("Updating...").subscribe();
+            Snowflake updatingMessageID = channel.getLastMessageId().get();
 
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
@@ -251,6 +255,7 @@ public class MangaCommand implements Command{
                 databaseWriter.write(newMainData.toJSONString());
                 databaseWriter.close();
             }
+            channel.getMessageById(updatingMessageID).flatMap(Message::delete).subscribe();
             channel.createMessage("Finished updating").subscribe();
         }
         catch (Exception e){
