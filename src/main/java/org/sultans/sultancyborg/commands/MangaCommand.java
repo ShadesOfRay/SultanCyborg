@@ -153,6 +153,7 @@ public class MangaCommand implements Command{
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
             JSONObject newMainData = new JSONObject();
+
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
                 try {
@@ -195,6 +196,7 @@ public class MangaCommand implements Command{
                         //If the new chapter json is larger, then there are new chapters
                         //make a embedded message for the new chapter
                         if(oldChapterArray.size() < newChapterArray.size()){
+                            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:ss");
                             int diff = newChapterArray.size() - oldChapterArray.size();
                             int oldPointer = 0;
                             for (int newPointer = 0; diff != 0; newPointer++){
@@ -203,6 +205,8 @@ public class MangaCommand implements Command{
                                 JSONObject newArrayChapter = (JSONObject)newChapterArray.get(newPointer);
                                 if (!oldArrayChapter.equals(newArrayChapter)){
                                     long groupID = (long) ((JSONArray)newArrayChapter.get("groups")).get(0);
+                                    long timestamp = (long)newArrayChapter.get("timestamp");
+                                    Date uploadDate = new Date(timestamp * 1000);
                                     channel.createEmbed(spec ->
                                         spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
                                             .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
@@ -211,6 +215,7 @@ public class MangaCommand implements Command{
                                             .setUrl(baseURL + String.format("chapter/%d/", (long) newArrayChapter.get("id")))
                                             .addField("Chapter", (String)newArrayChapter.get("chapter"), true)
                                             .addField("Group", (String) actualGroups.get(groupID), true)
+                                            .addField("Uploaded on", dateFormat.format(uploadDate),false)
                                             .addField("id", String.valueOf((long) manga.get("id")), true)
                                     ).block();
                                     diff--;
@@ -266,8 +271,7 @@ public class MangaCommand implements Command{
                     //JSONArray (JSONArray) manga.get("author");
                     JSONObject latestChapter = (JSONObject) chapterList.get(0);
                     long timestamp = (long)latestChapter.get("timestamp");
-                    System.out.println(timestamp);
-                    Date uploadDate = new Date(timestamp);
+                    Date uploadDate = new Date(timestamp * 1000);
                     channel.typeUntil(
                     channel.createEmbed(spec ->
                         spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
