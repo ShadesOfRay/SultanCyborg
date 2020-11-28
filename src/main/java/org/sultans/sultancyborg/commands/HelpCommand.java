@@ -26,7 +26,10 @@ public class HelpCommand implements Command{
     public void action(MessageCreateEvent event, String[] arguments) {
         event.getMessage()
             .getChannel()
-            .flatMap(channel -> channel.createEmbed(spec -> SultanCyborgMain.commands.forEach(command -> spec.addField(STATIC.PREFIX + command.invoker(), command.info(), false))))
+            .flatMap(channel -> channel.createEmbed(spec -> {
+                spec.setTitle("SultanCyborg Commands");
+                SultanCyborgMain.commands.forEach(command -> spec.addField(STATIC.PREFIX + command.invoker(), command.info(), false));
+            }))
             .subscribe();
     }
 

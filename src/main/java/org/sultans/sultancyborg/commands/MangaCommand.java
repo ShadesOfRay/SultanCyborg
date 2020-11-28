@@ -146,6 +146,7 @@ public class MangaCommand implements Command{
     private void updateManga(){
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+            JSONObject newMainData = new JSONObject();
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
                 try {
@@ -157,7 +158,7 @@ public class MangaCommand implements Command{
                     JSONObject newChapterObject = (JSONObject) parser.parse(response.body().charStream());
                     long responseCode = (long) newChapterObject.get("code");
                     if (responseCode == 200){
-                        //TODO make it update the main page too maybe
+                        //update the main pages as well
                         request = new Request.Builder()
                                 .url(cdnURL + "manga/" + key)
                                 .build();
@@ -168,10 +169,7 @@ public class MangaCommand implements Command{
                         //checks the response that mangadex gave
                         if (responseCode == 200) {
                             //if successful, get the data from mangadex
-                            mainData.put(data.get("id"), data);
-                            FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
-                            databaseWriter.write(mainData.toJSONString());
-                            databaseWriter.close();
+                            newMainData.put(key, data);
                         }
                         else {
                             channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterObject.get("status"))).block();
@@ -236,7 +234,12 @@ public class MangaCommand implements Command{
                     e.printStackTrace();
                 }
             });
-
+            //if the new data is the same size as the old data, nothing went wrong, clear to replace
+            if (newMainData.size() == mainData.size()) {
+                FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
+                databaseWriter.write(newMainData.toJSONString());
+                databaseWriter.close();
+            }
         }
         catch (Exception e){
             e.printStackTrace();
@@ -260,7 +263,6 @@ public class MangaCommand implements Command{
                         .addField("id", String.valueOf((long) manga.get("id")), true)
                 )).subscribe();
             });
-            channel.createMessage("Done listing").block();
         } catch (Exception e) {
             e.printStackTrace();
         }
