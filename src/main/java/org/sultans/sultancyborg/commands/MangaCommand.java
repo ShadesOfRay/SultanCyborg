@@ -9,9 +9,13 @@ import okhttp3.Response;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.sultans.sultancyborg.utils.STATIC;
 
 import java.io.*;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MangaCommand implements Command{
@@ -250,20 +254,31 @@ public class MangaCommand implements Command{
     private void listManga(){
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+
             //create a message for each key in the database
             mainData.forEach((key, value)-> {
                 JSONObject manga = (JSONObject) value;
-                //JSONArray (JSONArray) manga.get("author");
-                channel.typeUntil(
-                channel.createEmbed(spec ->
-                    spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
-                        .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
-                        .setThumbnail((String) manga.get("mainCover"))
-                        .setTitle((String) manga.get("title"))
-                        .setUrl(baseURL + String.format("manga/%d/", (long) manga.get("id")))
-                        .addField("id", String.valueOf((long) manga.get("id")), true)
-                )).subscribe();
-            });
+                try {
+                    JSONArray chapterList = (JSONArray) parser.parse(new FileReader("data/chapters/" + key + ".json"));
+                    //JSONArray (JSONArray) manga.get("author");
+                    JSONObject latestChapter = (JSONObject) chapterList.get(0);
+                    Calendar dateUpdated = Calendar.getInstance();
+                    dateUpdated.setTime(new Date((long)latestChapter.get("timestamp")));
+                    channel.typeUntil(
+                    channel.createEmbed(spec ->
+                        spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
+                            .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
+                            .setThumbnail((String) manga.get("mainCover"))
+                            .setTitle((String) manga.get("title"))
+                            .setUrl(baseURL + String.format("manga/%d/", (long) manga.get("id")))
+                            .addField("Latest Chapter", (String) latestChapter.get("chapter"), true)
+                            .addField("Last Updated", String.format("%d/%d/%d", dateUpdated.get(Calendar.MONTH), dateUpdated.get(Calendar.DAY_OF_MONTH), dateUpdated.get(Calendar.YEAR)), true )
+                            .addField("id", String.valueOf((long) manga.get("id")), true)
+                    )).subscribe();
+                } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         } catch (Exception e) {
             e.printStackTrace();
         }
