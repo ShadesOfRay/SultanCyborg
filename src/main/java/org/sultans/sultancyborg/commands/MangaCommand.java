@@ -265,7 +265,9 @@ public class MangaCommand implements Command{
                     JSONArray chapterList = (JSONArray) chapterData.get("chapters");
                     //JSONArray (JSONArray) manga.get("author");
                     JSONObject latestChapter = (JSONObject) chapterList.get(0);
-                    Date uploadDate = new Date((long)latestChapter.get("timestamp"));
+                    long timestamp = (long)latestChapter.get("timestamp");
+                    System.out.println(timestamp);
+                    Date uploadDate = new Date(timestamp);
                     channel.typeUntil(
                     channel.createEmbed(spec ->
                         spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
@@ -273,7 +275,7 @@ public class MangaCommand implements Command{
                             .setThumbnail((String) manga.get("mainCover"))
                             .setTitle((String) manga.get("title"))
                             .setUrl(baseURL + String.format("manga/%d/", (long) manga.get("id")))
-                            .addField("Latest Chapter", (String)latestChapter.get("chapter") , true)
+                            .addField("Latest Chapter", (String)latestChapter.get("chapter"), true)
                             .addField("Last Updated", dateFormat.format(uploadDate), true )
                             .addField("id", String.valueOf((long) manga.get("id")), true)
                     )).subscribe();
