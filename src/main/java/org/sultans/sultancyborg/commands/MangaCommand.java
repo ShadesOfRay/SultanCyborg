@@ -12,6 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.sultans.sultancyborg.utils.RateLimitInterceptor;
 import org.sultans.sultancyborg.utils.STATIC;
 
 import java.io.*;
@@ -49,8 +50,10 @@ public class MangaCommand implements Command{
     public void action(MessageCreateEvent event, String[] arguments) {
         if (arguments != null) {
             channel = event.getMessage().getChannel().block();
-            client = new OkHttpClient();
             parser = new JSONParser();
+            client = new OkHttpClient.Builder()
+                    .addInterceptor(new RateLimitInterceptor())
+                    .build();
 
             switch (arguments[0].toLowerCase()) {
                 case "add":

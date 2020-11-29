@@ -20,6 +20,7 @@ dependencies {
     implementation 'com.cedarsoftware:json-io:4.10.1'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.google.guava:guava:28.0-jre'
 }
 
 task (runMain, dependsOn: 'classes', type: JavaExec){
