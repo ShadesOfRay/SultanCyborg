@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.rest.util.Color;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -262,7 +263,8 @@ public class MangaCommand implements Command{
                 databaseWriter.write(newMainData.toJSONString());
                 databaseWriter.close();
             }
-            channel.getMessageById(updatingMessageID).subscribe(Message::delete);
+            channel.getMessageById(updatingMessageID).flatMap(message -> message.addReaction(ReactionEmoji.unicode("U+1F60D"))).subscribe();
+            channel.getMessageById(updatingMessageID).flatMap(Message::delete).subscribe();
             channel.createMessage("Finished updating").subscribe();
         }
         catch (Exception e){
