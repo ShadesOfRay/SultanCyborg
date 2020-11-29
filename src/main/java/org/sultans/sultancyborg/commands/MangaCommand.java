@@ -162,7 +162,8 @@ public class MangaCommand implements Command{
             channel.getLastMessage()
                     .flatMap(message -> message.addReaction(ReactionEmoji.unicode("\uD83D\uDC4C")))
                     .subscribe();
-            channel.createMessage("Updating...").block();
+            channel.createMessage("Updating...").subscribe();
+            //for some reason this is the message before the Updating... message
             Snowflake updatingMessageID = channel.getLastMessageId().get();
 
             mainData.forEach((key, value) -> {
@@ -266,8 +267,8 @@ public class MangaCommand implements Command{
                 databaseWriter.write(newMainData.toJSONString());
                 databaseWriter.close();
             }
-            channel.getMessageById(updatingMessageID).flatMap(message -> message.addReaction(ReactionEmoji.unicode("\uD83D\uDC4C"))).subscribe();
-            channel.getMessageById(updatingMessageID).flatMap(Message::delete).subscribe();
+            //again, for some reason the updating manga message does not count, so it deletes the one right after
+            channel.getMessagesAfter(updatingMessageID).take(1).flatMap(Message::delete).subscribe();
             channel.createMessage("Finished updating").subscribe();
         }
         catch (Exception e){
