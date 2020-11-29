@@ -159,8 +159,10 @@ public class MangaCommand implements Command{
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
             JSONObject newMainData = new JSONObject();
-            channel.getLastMessage().flatMap(message -> message.addReaction(ReactionEmoji.unicode("\uD83D\uDC4C")));
-            channel.createMessage("Updating...").subscribe();
+            channel.getLastMessage()
+                    .flatMap(message -> message.addReaction(ReactionEmoji.unicode("\uD83D\uDC4C")))
+                    .subscribe();
+            channel.createMessage("Updating...").block();
             Snowflake updatingMessageID = channel.getLastMessageId().get();
 
             mainData.forEach((key, value) -> {
