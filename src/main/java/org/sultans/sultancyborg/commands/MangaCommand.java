@@ -208,20 +208,24 @@ public class MangaCommand implements Command{
                                 JSONObject oldArrayChapter = (JSONObject)oldChapterArray.get(oldPointer);
                                 JSONObject newArrayChapter = (JSONObject)newChapterArray.get(newPointer);
                                 if (!oldArrayChapter.equals(newArrayChapter)){
-                                    long groupID = (long) ((JSONArray)newArrayChapter.get("groups")).get(0);
-                                    long timestamp = (long)newArrayChapter.get("timestamp");
-                                    Date uploadDate = new Date(timestamp * 1000);
-                                    channel.createEmbed(spec ->
-                                        spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
-                                            .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
-                                            .setThumbnail((String) manga.get("mainCover"))
-                                            .setTitle((String) manga.get("title"))
-                                            .setUrl(baseURL + String.format("chapter/%d/", (long) newArrayChapter.get("id")))
-                                            .addField("Chapter", (String)newArrayChapter.get("chapter"), true)
-                                            .addField("Group", (String) actualGroups.get(groupID), true)
-                                            .addField("Uploaded on", dateFormat.format(uploadDate),false)
-                                            .addField("id", String.valueOf((long) manga.get("id")), true)
-                                    ).block();
+                                    String language = (String) newArrayChapter.get("language");
+                                    //Only send a message if it is an english chapter, possibly accept other languages later
+                                    if (language.equals("gb")) {
+                                        long groupID = (long) ((JSONArray) newArrayChapter.get("groups")).get(0);
+                                        long timestamp = (long) newArrayChapter.get("timestamp");
+                                        Date uploadDate = new Date(timestamp * 1000);
+                                        channel.createEmbed(spec ->
+                                                spec.setColor(Color.of((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256)))
+                                                        .setAuthor((String) ((JSONArray) manga.get("author")).get(0), null, null)
+                                                        .setThumbnail((String) manga.get("mainCover"))
+                                                        .setTitle((String) manga.get("title"))
+                                                        .setUrl(baseURL + String.format("chapter/%d/", (long) newArrayChapter.get("id")))
+                                                        .addField("Chapter", (String) newArrayChapter.get("chapter"), true)
+                                                        .addField("Group", (String) actualGroups.get(groupID), true)
+                                                        .addField("Uploaded on", dateFormat.format(uploadDate), false)
+                                                        .addField("id", String.valueOf((long) manga.get("id")), true)
+                                        ).block();
+                                    }
                                     diff--;
                                 }
                                 else {
@@ -255,7 +259,7 @@ public class MangaCommand implements Command{
                 databaseWriter.write(newMainData.toJSONString());
                 databaseWriter.close();
             }
-            channel.getMessageById(updatingMessageID).flatMap(Message::delete).subscribe();
+            channel.getMessageById(updatingMessageID).subscribe(Message::delete);
             channel.createMessage("Finished updating").subscribe();
         }
         catch (Exception e){
