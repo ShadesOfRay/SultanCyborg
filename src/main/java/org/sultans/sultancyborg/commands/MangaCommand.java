@@ -263,7 +263,7 @@ public class MangaCommand implements Command{
                 databaseWriter.write(newMainData.toJSONString());
                 databaseWriter.close();
             }
-            channel.getMessageById(updatingMessageID).flatMap(message -> message.addReaction(ReactionEmoji.unicode("U+1F60D"))).subscribe();
+            channel.getMessageById(updatingMessageID).flatMap(message -> message.addReaction(ReactionEmoji.unicode("\uD83D\uDC4C"))).subscribe();
             channel.getMessageById(updatingMessageID).flatMap(Message::delete).subscribe();
             channel.createMessage("Finished updating").subscribe();
         }
