@@ -213,9 +213,9 @@ public class MangaCommand implements Command{
                             int oldPointer = 0;
                             for (int newPointer = 0; diff != 0; newPointer++){
                                 //checks if the chapters are equal
-                                JSONObject oldArrayChapter = (JSONObject)oldChapterArray.get(oldPointer);
-                                JSONObject newArrayChapter = (JSONObject)newChapterArray.get(newPointer);
-                                if (!oldArrayChapter.equals(newArrayChapter)){
+                                JSONObject oldArrayChapter = (JSONObject) oldChapterArray.get(oldPointer);
+                                JSONObject newArrayChapter = (JSONObject) newChapterArray.get(newPointer);
+                                if ((long)oldArrayChapter.get("timestamp") != (long)newArrayChapter.get("timestamp")){
                                     String language = (String) newArrayChapter.get("language");
                                     //Only send a message if it is an english chapter, possibly accept other languages later
                                     if (language.equals("gb")) {
@@ -228,6 +228,7 @@ public class MangaCommand implements Command{
                                                         .setThumbnail((String) manga.get("mainCover"))
                                                         .setTitle((String) manga.get("title"))
                                                         .setUrl(baseURL + String.format("chapter/%d/", (long) newArrayChapter.get("id")))
+                                                        .setDescription((String) newArrayChapter.get("title"))
                                                         .addField("Chapter", (String) newArrayChapter.get("chapter"), true)
                                                         .addField("Group", (String) actualGroups.get(groupID), true)
                                                         .addField("Uploaded on", dateFormat.format(uploadDate), false)
