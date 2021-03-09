@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MangaCommand implements Command{
     private final String baseURL = "https://mangadex.org/";
-    private final String cdnURL = "https://mangadex.org/api/v2/";
+    private final String cdnURL = "https://api.mangadex.org/v2/";
     private OkHttpClient client;
     private MessageChannel channel;
     private JSONParser parser;
