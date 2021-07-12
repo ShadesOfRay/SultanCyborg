@@ -15,12 +15,13 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    implementation 'com.discord4j:discord4j-core:3.1.1'
+    implementation 'com.discord4j:discord4j-core:3.1.7'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'com.cedarsoftware:json-io:4.10.1'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.google.guava:guava:28.0-jre'
+    implementation "com.merakianalytics.orianna:orianna:4.0.0-rc7"
 }
 
 task (runMain, dependsOn: 'classes', type: JavaExec){

@@ -19,14 +19,16 @@ public class SultanCyborgMain {
         //Add all the org.sultans.SultanCyborg.commands
         commands.add(new PingCommand());
         commands.add(new DateAddCommand());
-        commands.add(new MangaCommand());
+        //commands.add(new MangaCommand());
         commands.add(new HelpCommand());
+        commands.add(new MeirlCommand());
         //Create the client
         client = DiscordClientBuilder.create(args[0])
                 .build()
                 .login()
                 .block();
 
+        /*
         client.getEventDispatcher().on(ReadyEvent.class)
                 .subscribe(event -> {
                     User self = event.getSelf();
@@ -35,6 +37,10 @@ public class SultanCyborgMain {
                             .flatMap(messageChannel -> messageChannel.createMessage("Bot Online"))
                             .subscribe();
                 });
+
+         */
+
+
         //The message listener, which filters out messages from bots and then sends them to the parser
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
