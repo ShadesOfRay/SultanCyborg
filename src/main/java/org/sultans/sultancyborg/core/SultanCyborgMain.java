@@ -5,6 +5,7 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import org.sultans.sultancyborg.commands.*;
@@ -47,6 +48,15 @@ public class SultanCyborgMain {
                 .subscribe(event -> {
                     MessageParser.parseMessage(event);
         });
+
+        //congrats on the engagement
+        client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(message -> message.getMessage().getAuthor().map(user -> user.getId().asString().equals("152897641942876162")).orElse(false))
+                .flatMap(message -> message.getMessage().getChannel())
+                .flatMap(channel -> channel.createMessage("Hey Zach, Congrats on the engagement"))
+                .subscribe();
+
+
         client.onDisconnect().block();
     }
 }
