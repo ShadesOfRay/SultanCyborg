@@ -10,6 +10,7 @@ public class MessageParser {
     private static String raw;
     private static String no_prefix;
     private static String[] arguments;
+    private static int temp = 0;
 
     /**
      * The parse message function, which checks if a message contains the prefix to call the bot, and if that uses a command
@@ -19,6 +20,16 @@ public class MessageParser {
      * @return 1 if the message contained a valid command, 0 if it did not
      */
     public static int parseMessage(MessageCreateEvent event){
+        //for fun
+        if (event.getMessage().getAuthor().get().getId().asString().equals("152897641942876162")){
+            if (temp == 0) {
+                event.getMessage().getChannel()
+                        .flatMap(channel -> channel.createMessage("Hey Zach, Congrats on the engagement"))
+                        .subscribe();
+            }
+        }
+        temp = (temp + 1) % 5;
+
         //get the raw string from the message
         raw = event.getMessage().getContent();
         if (raw.startsWith(STATIC.PREFIX)){
@@ -61,6 +72,7 @@ public class MessageParser {
             channel.createMessage("That's crazy, cuz I didn't ask").block();
             return 0;
         }
+
         return 0;
     }
 }
