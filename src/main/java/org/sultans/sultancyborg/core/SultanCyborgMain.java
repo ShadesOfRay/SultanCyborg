@@ -50,12 +50,12 @@ public class SultanCyborgMain {
         });
 
         //congrats on the engagement
+        //152897641942876162
         client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(message -> message.getMessage().getAuthor().map(user -> user.getId().asString().equals("152897641942876162")).orElse(false))
+                .filter(message -> message.getMessage().getAuthor().map(user -> user.getId().asString().equals("211843613947068416")).orElse(false))
                 .flatMap(message -> message.getMessage().getChannel())
                 .flatMap(channel -> channel.createMessage("Hey Zach, Congrats on the engagement"))
                 .subscribe();
-
 
         client.onDisconnect().block();
     }
