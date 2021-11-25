@@ -20,11 +20,13 @@ import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MangaCommand implements Command{
+public class MangaCommand implements Command {
     private final String baseURL = "https://mangadex.org/";
     private final String cdnURL = "https://api.mangadex.org/";
     private OkHttpClient client;
@@ -60,8 +62,7 @@ public class MangaCommand implements Command{
                 case "add":
                     if (arguments.length == 2) {
                         addManga(arguments[1]);
-                    }
-                    else {
+                    } else {
                         channel.createMessage("Invalid amount of arguments").block();
                     }
                     break;
@@ -74,16 +75,14 @@ public class MangaCommand implements Command{
                 case "remove":
                     if (arguments.length == 2) {
                         removeManga(arguments[1]);
-                    }
-                    else {
+                    } else {
                         channel.createMessage("Invalid amount of arguments").block();
                     }
-
+                    break;
                 default:
                     printHelp();
             }
-        }
-        else {
+        } else {
             printHelp();
         }
     }
@@ -94,8 +93,8 @@ public class MangaCommand implements Command{
     }
 
     private void addManga(String mangaURL) {
-        //checks if the string is a valid mangadex link
-        if (mangaURL.startsWith("https://mangadex.org/title/")) {
+        //checks if the string is a valid mangadex link4
+        if (mangaURL.startsWith(baseURL + "title/")) {
             String mangaID = mangaURL.substring(27, mangaURL.lastIndexOf("/"));
             System.out.println(mangaID);
             try {
@@ -104,69 +103,82 @@ public class MangaCommand implements Command{
                 if (!mainData.containsKey(mangaID)) {
                     //sends a request to the mangadex api for the manga in question
                     Request request = new Request.Builder()
-                            .url(cdnURL + "manga/" + mangaID)
+                            .url(cdnURL + "manga/" + mangaID + "?includes[]=author&includes[]=cover_art")
                             .build();
                     Response response = client.newCall(request).execute();
                     response.code();
                     //checks the response that mangadex gave
                     if (response.code() == 200) {
                         JSONObject temp = (JSONObject) parser.parse(response.body().charStream());
-                        long responseCode = (long) temp.get("code");
-                        if (responseCode != 200){
-                            channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) temp.get("message"))).block();
-                        }
-                        else {
+                        String result = (String) temp.get("result");
+                        if (!result.equals("ok")) {
+                            channel.createMessage(String.format("Unexpected result: %d %s", result, (String) temp.get("message"))).block();
+                        } else {
                             //if successful, get the data from mangadex
                             JSONObject data = (JSONObject) temp.get("data");
+
                             mainData.put(data.get("id"), data);
+                            /*
                             FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
                             databaseWriter.write(mainData.toJSONString());
                             databaseWriter.close();
+                            */
                             //build a new request for the list of chapters
                             request = new Request.Builder()
-                                    .url(cdnURL + "manga/" + mangaID + "/chapters")
+                                    .url(cdnURL + "manga/" + mangaID + "/aggregate?translatedLanguage[]=en")
                                     .build();
                             response = client.newCall(request).execute();
 
                             //check if the chapters gave a good response code
                             if (response.code() == 200) {
                                 temp = (JSONObject) parser.parse(response.body().string());
-                                responseCode = (long) temp.get("code");
-                                if (responseCode != 200) {
-                                    channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) temp.get("message"))).block();
-                                }
-                                else {
-                                    JSONObject chapterData = (JSONObject) temp.get("data");
-                                    //write the data to its own file
-                                    File chapterDataFile = new File("data/chapters/" + data.get("id") + ".json");
-                                    FileWriter chapterDataWriter = new FileWriter(chapterDataFile);
-                                    chapterDataWriter.write(chapterData.toJSONString());
-                                    chapterDataWriter.close();
-                                    channel.createMessage(String.format("Successfully added \"%s\" to the database", data.get("title"))).block();
+                                result = (String) temp.get("result");
+                                if (!result.equals("ok")) {
+                                    channel.createMessage(String.format("Unexpected result: %d %s", result, (String) temp.get("message"))).block();
+                                } else {
+                                    //JSONObject chapterData = (JSONObject) temp.get("data");
+                                    JSONObject volumes = (JSONObject) temp.get("volumes");
+                                    //write the data
+                                    JSONObject chapterJSON = new JSONObject();
+                                    volumes.forEach((volumeKey, volumeObj) -> {
+                                        JSONObject volume = (JSONObject) volumeObj;
+                                        JSONObject chapters = (JSONObject) volume.get("chapters");
+                                        chapters.forEach((chapterKey, chapterObj) -> {
+                                            JSONObject chapter = (JSONObject) chapterObj;
+                                            chapterJSON.put(chapter.get("id"), chapter.get("chapter"));
+                                        });
+                                    });
+
+
+                                    data.put("chapters", chapterJSON);
+                                    mainData.put(mangaID, data);
+                                    FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
+                                    databaseWriter.write(mainData.toJSONString());
+                                    databaseWriter.close();
+
+                                    String title = (String) ((JSONObject) ((JSONObject) data.get("attributes")).get("title")).get("en");
+                                    channel.createMessage(String.format("Successfully added `%s` to the database", title)).block();
                                 }
 
                             } else {
                                 channel.createMessage(String.format("Unexpected response code: %d", response.code())).block();
                             }
                         }
-                    }
-                    else {
+                    } else {
                         channel.createMessage(String.format("Unexpected response code: %d", response.code())).block();
                     }
-                }
-                else {
+                } else {
                     channel.createMessage("Manga already in database").block();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
             channel.createMessage("That's not even a valid MangaDex link dood").block();
         }
     }
 
-    private void updateManga(){
+    private void updateManga() {
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
             JSONObject newMainData = new JSONObject();
@@ -179,167 +191,171 @@ public class MangaCommand implements Command{
 
             mainData.forEach((key, value) -> {
                 //get the new chapter json, check the size differences
+                JSONObject newMangaData = new JSONObject();
                 try {
-                    JSONObject oldChapterData = (JSONObject) parser.parse(new FileReader("data/chapters/"+ key + ".json"));
+                    JSONObject manga = (JSONObject) value;
                     Request request = new Request.Builder()
-                            .url(cdnURL + "manga/" + key + "/chapters")
+                            .url(cdnURL + "manga/" + key + "/aggregate?translatedLanguage[]=en")
                             .build();
                     Response response = client.newCall(request).execute();
                     if (response.code() != 200) {
+                        System.out.println("here!");
                         channel.createMessage(String.format("Unexpected response code: %d", response.code())).block();
-                    }
-                    else {
+                    } else {
                         JSONObject newChapterObject = (JSONObject) parser.parse(response.body().charStream());
-                        long responseCode = (long) newChapterObject.get("code");
-                        if (responseCode == 200) {
+                        String result = (String) newChapterObject.get("result");
+                        if (result.equals("ok")) {
                             //update the main pages as well
                             request = new Request.Builder()
-                                    .url(cdnURL + "manga/" + key)
+                                    .url(cdnURL + "manga/" + key + "?includes[]=author&includes[]=cover_art")
                                     .build();
                             response = client.newCall(request).execute();
                             JSONObject temp = (JSONObject) parser.parse(response.body().charStream());
                             if (response.code() != 200) {
                                 channel.createMessage(String.format("Unexpected response code: %d", response.code())).block();
-                            }
-                            else {
+                            } else {
                                 JSONObject data = (JSONObject) temp.get("data");
-                                responseCode = (long) temp.get("code");
+                                result = (String) temp.get("result");
                                 //checks the response that mangadex gave
-                                if (responseCode == 200) {
+                                if (result.equals("ok")) {
                                     //if successful, get the data from mangadex
-                                    newMainData.put(key, data);
+                                    newMangaData = data;
                                 } else {
-                                    channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterObject.get("status"))).block();
+                                    channel.createMessage(String.format("Unexpected response code: %d %s", result, (String) newChapterObject.get("status"))).block();
                                 }
                             }
-                            JSONObject manga = (JSONObject) value;
-                            JSONObject newChapterData = (JSONObject) newChapterObject.get("data");
-                            JSONArray groupArray = (JSONArray) newChapterData.get("groups");
-                            JSONObject actualGroups = new JSONObject();
-                            groupArray.forEach(group -> {
-                                JSONObject groupObj = (JSONObject) group;
-                                actualGroups.put(groupObj.get("id"), groupObj.get("name"));
-                            });
-                            //gets the chapter arrays for both the old and new ones
-                            JSONArray newChapterArray = (JSONArray) newChapterData.get("chapters");
-                            JSONArray oldChapterArray = (JSONArray) oldChapterData.get("chapters");
-                            //If the new chapter json is larger, then there are new chapters
-                            //make a embedded message for the new chapter
-                            if (oldChapterArray.size() < newChapterArray.size()) {
-                                DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:ss");
-                                int diff = newChapterArray.size() - oldChapterArray.size();
-                                int oldPointer = 0;
-                                for (int newPointer = 0; diff != 0 && oldPointer < oldChapterArray.size(); newPointer++) {
-                                    //checks if the chapters are equal
-                                    JSONObject oldArrayChapter = (JSONObject) oldChapterArray.get(oldPointer);
-                                    JSONObject newArrayChapter = (JSONObject) newChapterArray.get(newPointer);
-                                    if ((long) oldArrayChapter.get("timestamp") != (long) newArrayChapter.get("timestamp")) {
-                                        String language = (String) newArrayChapter.get("language");
-                                        //Only send a message if it is an english chapter, possibly accept other languages later
-                                        if (language.equals("gb")) {
-                                            long groupID = (long) ((JSONArray) newArrayChapter.get("groups")).get(0);
-                                            long timestamp = (long) newArrayChapter.get("timestamp");
-                                            Date uploadDate = new Date(timestamp * 1000);
-                                            channel.createEmbed(spec ->
-                                                    spec.setColor(Color.of((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256)))
-                                                            .setAuthor((String) ((JSONArray) manga.get("author")).get(0), null, null)
-                                                            .setThumbnail((String) manga.get("mainCover"))
-                                                            .setTitle((String) manga.get("title"))
-                                                            .setUrl(baseURL + String.format("chapter/%d/", (long) newArrayChapter.get("id")))
-                                                            .setDescription((String) newArrayChapter.get("title"))
-                                                            .addField("Chapter", (String) newArrayChapter.get("chapter"), true)
-                                                            .addField("Group", (String) actualGroups.get(groupID), true)
-                                                            .addField("Uploaded on", dateFormat.format(uploadDate), false)
-                                                            .addField("id", String.valueOf((long) manga.get("id")), true)
-                                            ).block();
+                            //JSONObject chapterData = (JSONObject) temp.get("data");
+                            JSONObject volumes = (JSONObject) newChapterObject.get("volumes");
+                            JSONObject oldChapterJSON = (JSONObject) manga.get("chapters");
+                            //write the data
+                            JSONObject finalNewMangaData = newMangaData;
+                            volumes.forEach((volumeKey, volumeObj) -> {
+                                JSONObject volume = (JSONObject) volumeObj;
+                                JSONObject chapters = (JSONObject) volume.get("chapters");
+                                chapters.forEach((chapterKey, chapterObj) -> {
+                                    JSONObject chapter = (JSONObject) chapterObj;
+                                    String chapterID = (String) chapter.get("id");
+                                    if (!oldChapterJSON.containsKey(chapterID)) {
+                                        oldChapterJSON.put(chapterID, chapter.get("chapter"));
+                                        try {
+                                            Request chapterRequest = new Request.Builder()
+                                                    .url(cdnURL + "chapter/" + chapterID + "?includes[]=scanlation_group")
+                                                    .build();
+
+                                            Response chapterResponse = client.newCall(chapterRequest).execute();
+                                            JSONObject chapterData = (JSONObject) parser.parse(chapterResponse.body().charStream());
+                                            if (chapterResponse.code() != 200) {
+                                                channel.createMessage(String.format("Unexpected response code: %d", chapterResponse.code())).block();
+                                            } else {
+                                                JSONObject data = (JSONObject) chapterData.get("data");
+                                                String chapterResult = (String) chapterData.get("result");
+                                                //checks the response that mangadex gave
+                                                if (chapterResult.equals("ok")) {
+                                                    //Make the channel response
+                                                    JSONArray mangaRelationships = (JSONArray) finalNewMangaData.get("relationships");
+                                                    JSONObject authorAttributes = (JSONObject) ((JSONObject) mangaRelationships.get(0)).get("attributes");
+                                                    JSONObject coverAttributes = (JSONObject) ((JSONObject) mangaRelationships.get(2)).get("attributes");
+                                                    String coverUrl = (String) coverAttributes.get("fileName");
+                                                    String author = (String) authorAttributes.get("name");
+                                                    JSONObject attributes = (JSONObject) data.get("attributes");
+                                                    String chapterNum = (String) attributes.get("chapter");
+                                                    String chapterDesc = (String) attributes.get("title");
+                                                    JSONArray relationships = (JSONArray) data.get("relationships");
+                                                    JSONObject groupAttributes = (JSONObject) ((JSONObject) relationships.get(0)).get("attributes");
+                                                    DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:ss");
+                                                    Date uploadDate = Date.from((OffsetDateTime.parse((String) attributes.get("createdAt")).toInstant()));
+                                                    channel.createEmbed(spec ->
+                                                            spec.setColor(Color.of((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256)))
+                                                                    .setAuthor(author, null, null)
+                                                                    .setThumbnail("https://uploads.mangadex.org/covers/" + String.format("%s/%s.512.jpg", key, coverUrl))
+                                                                    .setTitle((String) ((JSONObject) ((JSONObject) finalNewMangaData.get("attributes")).get("title")).get("en"))
+                                                                    .setUrl(baseURL + String.format("chapter/%s", data.get("id")))
+                                                                    .setDescription(chapterDesc == null? "": chapterDesc)
+                                                                    .addField("Chapter", chapterNum == null? "N/A": chapterNum, true)
+                                                                    .addField("Group", (String) groupAttributes.get("name"), true)
+                                                                    .addField("Uploaded on", dateFormat.format(uploadDate), false)
+                                                                    .addField("id", (String) finalNewMangaData.get("id"), true)
+                                                    ).block();
+                                                } else {
+                                                    channel.createMessage(String.format("Unexpected response code: %s %s", chapterResult, (String) newChapterObject.get("status"))).block();
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
                                         }
-                                        diff--;
-                                    } else {
-                                        oldPointer++;
                                     }
-                                }
-                                FileWriter chapterDataWriter = new FileWriter("data/chapters/" + key + ".json");
-                                chapterDataWriter.write(newChapterData.toJSONString());
-                                chapterDataWriter.close();
-                            }
-                            //If the new chapter json is smaller, then there was a deleted chapter
-                            //silently replace the chapter file with the new one
-                            else if (oldChapterArray.size() > newChapterArray.size()) {
-                                FileWriter chapterDataWriter = new FileWriter("data/chapters/" + key + ".json");
-                                chapterDataWriter.write(newChapterData.toJSONString());
-                                chapterDataWriter.close();
-                            }
-                            //Chapter arrays are the same size, do nothing
+                                });
+                                finalNewMangaData.put("chapters", oldChapterJSON);
+                            });
+                            newMainData.put(key, finalNewMangaData);
                         } else {
-                            channel.createMessage(String.format("Unexpected response code: %d %s", responseCode, (String) newChapterObject.get("status"))).block();
+                            channel.createMessage(String.format("Unexpected response code: %s %s", result, (String) newChapterObject.get("status"))).block();
                         }
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
             //if the new data is the same size as the old data, nothing went wrong, clear to replace
-            if (newMainData.size() == mainData.size()) {
-                FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
-                databaseWriter.write(newMainData.toJSONString());
-                databaseWriter.close();
-            }
+            FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
+            databaseWriter.write(newMainData.toJSONString());
+            databaseWriter.close();
             //again, for some reason the updating manga message does not count, so it deletes the one right after
             channel.getMessagesAfter(updatingMessageID).take(1).flatMap(Message::delete).subscribe();
             channel.createMessage("Finished updating").subscribe();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    private void listManga(){
-        try {
-            JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
-            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-            //create a message for each key in the database
-            mainData.forEach((key, value)-> {
-                JSONObject manga = (JSONObject) value;
-                try {
-                    JSONObject chapterData = (JSONObject) parser.parse(new FileReader("data/chapters/" + key + ".json"));
-                    JSONArray chapterList = (JSONArray) chapterData.get("chapters");
-                    //JSONArray (JSONArray) manga.get("author");
-                    JSONObject latestChapter = (JSONObject) chapterList.get(0);
-                    long timestamp = (long)latestChapter.get("timestamp");
-                    Date uploadDate = new Date(timestamp * 1000);
-                    channel.typeUntil(
-                    channel.createEmbed(spec ->
-                        spec.setColor(Color.of((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)))
-                            .setAuthor((String)((JSONArray)manga.get("author")).get(0),null ,null)
-                            .setThumbnail((String) manga.get("mainCover"))
-                            .setTitle((String) manga.get("title"))
-                            .setUrl(baseURL + String.format("manga/%d/", (long) manga.get("id")))
-                            .addField("Latest Chapter", (String)latestChapter.get("chapter"), true)
-                            .addField("Last Updated", dateFormat.format(uploadDate), true )
-                            .addField("id", String.valueOf((long) manga.get("id")), true)
-                    )).subscribe();
-                } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void removeManga(String id){
+    private void listManga() {
+        try {
+            JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            //create a message for each key in the database
+            mainData.forEach((key, value) -> {
+                JSONObject manga = (JSONObject) value;
+                try {
+
+                    JSONArray mangaRelationships = (JSONArray) manga.get("relationships");
+                    JSONObject mangaAttributes = (JSONObject) manga.get("attributes");
+                    JSONObject authorAttributes = (JSONObject) ((JSONObject) mangaRelationships.get(0)).get("attributes");
+                    JSONObject coverAttributes = (JSONObject) ((JSONObject) mangaRelationships.get(2)).get("attributes");
+                    String coverUrl = (String) coverAttributes.get("fileName");
+                    String author = (String) authorAttributes.get("name");
+                    Date uploadDate = Date.from((OffsetDateTime.parse((String) mangaAttributes.get("updatedAt")).toInstant()));
+
+                    channel.typeUntil(
+                            channel.createEmbed(spec ->
+                                    spec.setColor(Color.of((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256)))
+                                            .setAuthor(author, null, null)
+                                            .setThumbnail("https://uploads.mangadex.org/covers/" + String.format("%s/%s.512.jpg", key, coverUrl))
+                                            .setTitle((String) ((JSONObject) ((JSONObject) manga.get("attributes")).get("title")).get("en"))
+                                            .setUrl(baseURL + String.format("manga/%s", manga.get("id")))
+                                            .addField("Latest Chapter", (String) mangaAttributes.get("lastChapter"), true)
+                                            .addField("Last Updated", dateFormat.format(uploadDate), true)
+                                            .addField("id", (String) manga.get("id"), true)
+                            )).subscribe();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void removeManga(String id) {
         try {
             JSONObject mainData = (JSONObject) parser.parse(new FileReader("data/mangaDatabase.json"));
             //check if the database has the key, then remove it if it does
-            if (mainData.containsKey(id)){
+            if (mainData.containsKey(id)) {
                 mainData.remove(id);
                 FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
                 databaseWriter.write(mainData.toJSONString());
                 databaseWriter.close();
                 channel.createMessage("Removed").block();
-            }
-            else {
+            } else {
                 channel.createMessage("That manga is not in the database").block();
             }
         } catch (Exception e) {
@@ -347,16 +363,16 @@ public class MangaCommand implements Command{
         }
     }
 
-    private void printHelp(){
+    private void printHelp() {
         //creates an embedded message for the help message
         channel.createEmbed(spec ->
-            spec.setColor(Color.BLACK)
-                .setTitle(STATIC.PREFIX + "manga <command> [args]")
-                .addField("help", "Prints this message", false)
-                .addField("add [MangaDex manga Link]", "Adds the given manga from MangaDex to the database", false)
-                .addField("remove [Manga ID]", "Removes the given manga from the database", false)
-                .addField("list", "Lists all the manga in the database", false)
-                .addField("update", "Updates all the manga in the database, and sends any new chapters", false)
+                spec.setColor(Color.BLACK)
+                        .setTitle(STATIC.PREFIX + "manga <command> [args]")
+                        .addField("help", "Prints this message", false)
+                        .addField("add [MangaDex manga Link]", "Adds the given manga from MangaDex to the database", false)
+                        .addField("remove [Manga ID]", "Removes the given manga from the database", false)
+                        .addField("list", "Lists all the manga in the database", false)
+                        .addField("update", "Updates all the manga in the database, and sends any new chapters", false)
         ).block();
     }
 }
