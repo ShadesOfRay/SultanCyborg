@@ -332,7 +332,7 @@ public class MangaCommand implements Command {
                                             .setThumbnail("https://uploads.mangadex.org/covers/" + String.format("%s/%s.512.jpg", key, coverUrl))
                                             .setTitle((String) ((JSONObject) ((JSONObject) manga.get("attributes")).get("title")).get("en"))
                                             .setUrl(baseURL + String.format("manga/%s", manga.get("id")))
-                                            .addField("Latest Chapter", (String) mangaAttributes.get("lastChapter"), true)
+                                            //.addField("Latest Chapter", (String) mangaAttributes.get("lastChapter"), true)
                                             .addField("Last Updated", dateFormat.format(uploadDate), true)
                                             .addField("id", (String) manga.get("id"), true)
                             )).subscribe();
