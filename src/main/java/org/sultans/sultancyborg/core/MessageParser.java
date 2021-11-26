@@ -1,8 +1,10 @@
 package org.sultans.sultancyborg.core;
 
+import discord4j.core.object.entity.channel.Channel;
 import org.sultans.sultancyborg.commands.Command;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.MessageChannel;
+import org.sultans.sultancyborg.listeners.ChannelListener;
 import org.sultans.sultancyborg.utils.STATIC;
 
 public class MessageParser {
@@ -72,7 +74,13 @@ public class MessageParser {
             channel.createMessage("That's crazy, cuz I didn't ask").block();
             return 0;
         }
-
+        else {
+            for (ChannelListener channelListener: SultanCyborgMain.channelListeners) {
+                if (event.getMessage().getChannelId().asString().equals(channelListener.channel())) {
+                    channelListener.action(event);
+                }
+            }
+        }
         return 0;
     }
 }

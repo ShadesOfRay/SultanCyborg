@@ -5,6 +5,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.sultans.sultancyborg.commands.*;
 import org.sultans.sultancyborg.listeners.ChannelListener;
+import org.sultans.sultancyborg.listeners.SubmissionListener;
 
 import java.util.ArrayList;
 
@@ -20,6 +21,9 @@ public class SultanCyborgMain {
         commands.add(new MangaCommand());
         commands.add(new HelpCommand());
         commands.add(new MeirlCommand());
+        //Add all the listeners
+        channelListeners.add(new SubmissionListener());
+
         //Create the client
         client = DiscordClientBuilder.create(args[0])
                 .build()
@@ -43,13 +47,6 @@ public class SultanCyborgMain {
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
                 .subscribe(MessageParser::parseMessage);
-
-        client.getEventDispatcher().on(MessageCreateEvent.class)
-                .flatMap(message -> message.getMessage().getChannel())
-                .filter(channel -> channel.getId().asString().equals("864209025738473505"))
-                .subscribe(event -> {
-
-        });
 
         client.onDisconnect().block();
     }

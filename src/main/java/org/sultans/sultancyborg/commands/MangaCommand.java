@@ -12,19 +12,14 @@ import okhttp3.Response;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.sultans.sultancyborg.utils.RateLimitInterceptor;
 import org.sultans.sultancyborg.utils.STATIC;
 
 import java.io.*;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MangaCommand implements Command {
     private final String baseURL = "https://mangadex.org/";
@@ -118,11 +113,6 @@ public class MangaCommand implements Command {
                             JSONObject data = (JSONObject) temp.get("data");
 
                             mainData.put(data.get("id"), data);
-                            /*
-                            FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
-                            databaseWriter.write(mainData.toJSONString());
-                            databaseWriter.close();
-                            */
                             //build a new request for the list of chapters
                             request = new Request.Builder()
                                     .url(cdnURL + "manga/" + mangaID + "/aggregate?translatedLanguage[]=en")
@@ -148,8 +138,6 @@ public class MangaCommand implements Command {
                                             chapterJSON.put(chapter.get("id"), chapter.get("chapter"));
                                         });
                                     });
-
-
                                     data.put("chapters", chapterJSON);
                                     mainData.put(mangaID, data);
                                     FileWriter databaseWriter = new FileWriter("data/mangaDatabase.json");
@@ -316,7 +304,6 @@ public class MangaCommand implements Command {
             mainData.forEach((key, value) -> {
                 JSONObject manga = (JSONObject) value;
                 try {
-
                     JSONArray mangaRelationships = (JSONArray) manga.get("relationships");
                     JSONObject mangaAttributes = (JSONObject) manga.get("attributes");
                     JSONObject authorAttributes = (JSONObject) ((JSONObject) mangaRelationships.get(0)).get("attributes");
@@ -331,7 +318,7 @@ public class MangaCommand implements Command {
                                             .setAuthor(author, null, null)
                                             .setThumbnail("https://uploads.mangadex.org/covers/" + String.format("%s/%s.512.jpg", key, coverUrl))
                                             .setTitle((String) ((JSONObject) ((JSONObject) manga.get("attributes")).get("title")).get("en"))
-                                            .setUrl(baseURL + String.format("manga/%s", manga.get("id")))
+                                            .setUrl(baseURL + String.format("title/%s", manga.get("id")))
                                             //.addField("Latest Chapter", (String) mangaAttributes.get("lastChapter"), true)
                                             .addField("Last Updated", dateFormat.format(uploadDate), true)
                                             .addField("id", (String) manga.get("id"), true)
