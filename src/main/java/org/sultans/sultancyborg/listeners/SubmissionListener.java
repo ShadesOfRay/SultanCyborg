@@ -12,7 +12,7 @@ public class SubmissionListener implements ChannelListener {
 
     @Override
     public String channel() {
-        return "913588739681419294";
+        return "914524325225300030";
     }
 
     @Override
@@ -25,7 +25,7 @@ public class SubmissionListener implements ChannelListener {
                     try {
                         BufferedInputStream inputStream = new BufferedInputStream(new URL(url).openStream());
                         String filename = url.substring(url.lastIndexOf('/')+1);
-                        FileOutputStream fileOS = new FileOutputStream("data/test/" + filename);
+                        FileOutputStream fileOS = new FileOutputStream("data/meirl/" + filename);
                         byte data[] = new byte[1024];
                         int byteContent;
                         while ((byteContent = inputStream.read(data, 0, 1024)) != -1) {

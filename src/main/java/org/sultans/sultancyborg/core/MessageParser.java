@@ -32,6 +32,13 @@ public class MessageParser {
         }
         temp = (temp + 1) % 5;
 
+        //also for fun
+        if (event.getMessage().getContent().startsWith("https://twitter.com/YakuzaFriday/")) {
+            event.getMessage().getChannel()
+                    .flatMap(channel -> channel.createMessage("Friday at last..."))
+                    .subscribe();
+        }
+
         //get the raw string from the message
         raw = event.getMessage().getContent();
         if (raw.startsWith(STATIC.PREFIX)){
