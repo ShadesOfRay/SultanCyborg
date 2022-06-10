@@ -39,6 +39,13 @@ public class MessageParser {
                     .subscribe();
         }
 
+        //also for fun
+        if (event.getMessage().getContent().toLowerCase().startsWith("slut!")) {
+            event.getMessage().getChannel()
+                    .flatMap(channel -> channel.createMessage("Rude..."))
+                    .subscribe();
+        }
+
         //get the raw string from the message
         raw = event.getMessage().getContent();
         if (raw.toLowerCase().startsWith(STATIC.PREFIX)) {
