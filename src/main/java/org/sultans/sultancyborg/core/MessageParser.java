@@ -23,7 +23,7 @@ public class MessageParser {
      */
     public static int parseMessage(MessageCreateEvent event){
         //for fun
-        if (event.getMessage().getAuthor().get().getId().asString().equals("152897641942876162")){
+        if (event.getMessage().getAuthor().get().getId().asString().equals("152897641942876162")) {
             if (temp == 0) {
                 event.getMessage().getChannel()
                         .flatMap(channel -> channel.createMessage("Hey Zach, Congrats on the engagement"))
@@ -41,11 +41,11 @@ public class MessageParser {
 
         //get the raw string from the message
         raw = event.getMessage().getContent();
-        if (raw.startsWith(STATIC.PREFIX)){
+        if (raw.toLowerCase().startsWith(STATIC.PREFIX)) {
             //checks if the command is standalone or has arguments
-            if (raw.contains(" ")){
+            if (raw.contains(" ")) {
                 int split = raw.indexOf(" ");
-                no_prefix = raw.substring(STATIC.PREFIX.length(),split);
+                no_prefix = raw.substring(STATIC.PREFIX.length(), split);
                 arguments = raw.substring(split+1).split(" ");
             }
             else {
@@ -54,8 +54,8 @@ public class MessageParser {
             }
 
             //checks each command to see if the command matches
-            for(Command cmd : SultanCyborgMain.commands){
-                if (no_prefix.equalsIgnoreCase(cmd.invoker())){
+            for(Command cmd : SultanCyborgMain.commands) {
+                if (no_prefix.equalsIgnoreCase(cmd.invoker())) {
                     if (cmd.argumentsNeeded() != null) {
                         for (int args : cmd.argumentsNeeded()) {
                             if ((args == 0 && arguments == null) ||args == arguments.length) {
