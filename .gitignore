@@ -4,4 +4,4 @@ config.json
 /.idea/
 /build/
 /data/
-/twitter4j.properties/
+twitter4j.properties
