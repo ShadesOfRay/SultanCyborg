@@ -22,6 +22,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.google.guava:guava:28.0-jre'
     implementation "com.merakianalytics.orianna:orianna:4.0.0-rc7"
+    implementation 'org.twitter4j:twitter4j-core:4.0.7'
 }
 
 task (runMain, dependsOn: 'classes', type: JavaExec){
