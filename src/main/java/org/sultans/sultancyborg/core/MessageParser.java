@@ -7,6 +7,8 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import org.sultans.sultancyborg.listeners.ChannelListener;
 import org.sultans.sultancyborg.utils.STATIC;
 
+import java.util.Arrays;
+
 public class MessageParser {
 
     private static String raw;
@@ -85,7 +87,14 @@ public class MessageParser {
             }
 
             final MessageChannel channel = event.getMessage().getChannel().block();
-            channel.createMessage("That's crazy, cuz I didn't ask").block();
+
+            // just hard code the repeat commands :)
+            String[] repeat_commands = {"help", "deafen", "join", "leave", "mute", "p", "play", "ping", "undeafen",
+                    "unmute", "pause", "resume", "skip", "stop", "quiet", "q", "queue", "remove", "sfx"};
+
+            if (!Arrays.asList(repeat_commands).contains(no_prefix)) {
+                channel.createMessage("That's crazy, cuz I didn't ask").block();
+            }
             return 0;
         }
         else {
