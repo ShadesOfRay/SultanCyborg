@@ -33,16 +33,6 @@ public class MessageParser {
      * @return 1 if the message contained a valid command, 0 if it did not
      */
     public static int parseMessage(MessageCreateEvent event) {
-        //for fun
-        if (event.getMessage().getAuthor().get().getId().asString().equals("152897641942876162")) {
-            if (temp == 0) {
-                event.getMessage().getChannel()
-                        .flatMap(channel -> channel.createMessage("Hey Zach, Congrats on the engagement"))
-                        .subscribe();
-            }
-        }
-        temp = (temp + 1) % 5;
-
         //also for fun
         if (event.getMessage().getContent().startsWith("https://twitter.com/YakuzaFriday/")) {
             event.getMessage().getChannel()
